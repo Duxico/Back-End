@@ -1,5 +1,11 @@
-# GoFrame Template For SingleRepo
+# Back-End
 
-Quick Start:
+## Run and Stop
 
-- [https://goframe.org/pages/viewpage.action?pageId=1114399](https://goframe.org/pages/viewpage.action?pageId=1114399)
+```bash
+# Run
+docker-compose up --build -d
+
+# Stop
+docker-compose down
+```
