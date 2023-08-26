@@ -2,7 +2,7 @@
 #                                   BUILD
 ###############################################################################
 
-FROM golang:1.21.0-alpine as builder
+FROM golang:1.21.0-alpine AS builder
 
 ENV WORKDIR /build
 
@@ -26,8 +26,6 @@ ENV WORKDIR /app
 
 WORKDIR $WORKDIR
 
-COPY --from=builder /build/main ./main
-
-RUN chmod +x ./main
+COPY --from=builder /build/main ./
 
 CMD ./main
