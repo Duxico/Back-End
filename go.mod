@@ -2,7 +2,10 @@ module Back-End
 
 go 1.21
 
-require github.com/gogf/gf/v2 v2.5.2
+require (
+	github.com/gogf/gf/contrib/drivers/pgsql/v2 v2.5.2
+	github.com/gogf/gf/v2 v2.5.2
+)
 
 require (
 	github.com/BurntSushi/toml v1.2.0 // indirect
@@ -13,6 +16,7 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/grokify/html-strip-tags-go v0.0.1 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
