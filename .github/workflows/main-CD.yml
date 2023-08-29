@@ -1,0 +1,63 @@
+name: CD
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  call-workflow-ci:
+    uses: ./.github/workflows/dev-CI.yml
+
+  deploy:
+    # needs: call-workflow-ci
+    strategy:
+      matrix:
+        go-version: [1.21.x]
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Build executable
+        run: make build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: manifest/docker/Dockerfile
+          load: true
+          tags: duxico/backend:latest
+
+      - name: Save docker image
+        run: |
+          [[ -d ./tmp ]] || mkdir -p ./tmp
+          docker save duxico/backend:latest -o ./tmp/backend.tar
+
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        with:
+            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            ARGS: "-rlgoDzvc -i --delete"
+            SOURCE: "./tmp/backend.tar ./manifest/deploy/docker-compose.yaml"
+            REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+            REMOTE_USER: ${{ secrets.REMOTE_USER }}
+            TARGET: ${{ secrets.REMOTE_TARGET }}
+            EXCLUDE: ""
+            SCRIPT_BEFORE: |
+              docker-compose down
+            SCRIPT_AFTER: |
+              docker load -i ./backend.tar
+              docker-compose up -d
