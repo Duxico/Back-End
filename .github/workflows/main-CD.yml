@@ -10,7 +10,7 @@ jobs:
     uses: ./.github/workflows/dev-CI.yml
 
   deploy:
-    # needs: call-workflow-ci
+    needs: call-workflow-ci
     strategy:
       matrix:
         go-version: [1.21.x]
