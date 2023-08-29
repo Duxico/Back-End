@@ -8,7 +8,7 @@ on:
   workflow_call:
 
 jobs:
-  lint:
+  ci:
     strategy:
       matrix:
         go-version: [1.21.x]
@@ -21,28 +21,12 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: ${{ matrix.go-version }}
-          cache: false
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
           args: -E gocritic
-
-  test:
-    strategy:
-      matrix:
-        go-version: [1.21.x]
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup go
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ matrix.go-version }}
-          cache: false
 
       - name: Run tests
         run: go test -v ./...

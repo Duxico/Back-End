@@ -9,7 +9,7 @@ jobs:
   call-workflow-ci:
     uses: ./.github/workflows/dev-CI.yml
 
-  deploy:
+  cd:
     needs: call-workflow-ci
     strategy:
       matrix:
@@ -40,6 +40,7 @@ jobs:
           file: manifest/docker/Dockerfile
           load: true
           tags: duxico/backend:latest
+          platforms: linux/amd64
 
       - name: Save docker image
         run: |
@@ -51,13 +52,14 @@ jobs:
         with:
             SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
             ARGS: "-rlgoDzvc -i --delete"
-            SOURCE: "./tmp/backend.tar ./manifest/deploy/docker-compose.yaml"
+            SOURCE: "./tmp/backend.tar ./manifest/deploy/docker-compose.yaml ./temp/v1.0.0/linux_amd64/main"
             REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+            REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
             REMOTE_USER: ${{ secrets.REMOTE_USER }}
             TARGET: ${{ secrets.REMOTE_TARGET }}
             EXCLUDE: ""
             SCRIPT_BEFORE: |
-              docker-compose down
+              [[ -f docker-compose.yaml ]] && docker-compose down
             SCRIPT_AFTER: |
               docker load -i ./backend.tar
               docker-compose up -d
