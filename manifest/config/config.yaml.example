@@ -6,3 +6,7 @@ server:
 logger:
   level : "all"
   stdout: true
+
+database:
+  default:
+    link: "pgsql:postgres:postgres@tcp(db:5432)/postgres"
