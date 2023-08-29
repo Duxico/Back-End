@@ -1,3 +1,4 @@
+SHELL:=/bin/bash
 
 # Install/Update to the latest CLI tool.
 .PHONY: cli
@@ -13,7 +14,7 @@ cli:
 .PHONY: cli.install
 cli.install:
 	@set -e; \
-	gf -v > /dev/null 2>&1 || if [[ "$?" -ne "0" ]]; then \
+	gf -v > /dev/null 2>&1 || { \
   		echo "GoFame CLI is not installed, start proceeding auto installation..."; \
 		make cli; \
-	fi;
+	}
