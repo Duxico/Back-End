@@ -32,6 +32,9 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+          platforms: linux/amd64
 
       - name: Build docker image
         uses: docker/build-push-action@v4
@@ -39,13 +42,13 @@ jobs:
           context: .
           file: manifest/docker/Dockerfile
           load: true
-          tags: duxico/backend:latest
+          tags: backend
           platforms: linux/amd64
 
       - name: Save docker image
         run: |
           [[ -d ./tmp ]] || mkdir -p ./tmp
-          docker save duxico/backend:latest -o ./tmp/backend.tar
+          docker save backend -o ./tmp/backend.tar
 
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@main
@@ -59,7 +62,11 @@ jobs:
             TARGET: ${{ secrets.REMOTE_TARGET }}
             EXCLUDE: ""
             SCRIPT_BEFORE: |
+              cd ${{ secrets.REMOTE_TARGET }}
               [[ -f docker-compose.yaml ]] && docker-compose down
+              docker system prune -f
+              docker rmi backend || true
             SCRIPT_AFTER: |
+              cd ${{ secrets.REMOTE_TARGET }}
               docker load -i ./backend.tar
               docker-compose up -d
