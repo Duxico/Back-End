@@ -52,7 +52,7 @@ jobs:
         with:
             SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
             ARGS: "-rlgoDzvc -i --delete"
-            SOURCE: "./tmp/backend.tar ./manifest/deploy/docker-compose.yaml ./temp/v1.0.0/linux_amd64/main"
+            SOURCE: "./tmp/backend.tar ./manifest/deploy/docker-compose.yaml"
             REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
             REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
             REMOTE_USER: ${{ secrets.REMOTE_USER }}
