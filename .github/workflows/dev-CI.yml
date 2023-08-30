@@ -20,6 +20,7 @@ jobs:
       - name: Setup go
         uses: actions/setup-go@v4
         with:
+          cache: false
           go-version: ${{ matrix.go-version }}
 
       - name: Run golangci-lint
