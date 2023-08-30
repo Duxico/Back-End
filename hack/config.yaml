@@ -1,0 +1,13 @@
+
+# CLI tool, only in development environment.
+# https://goframe.org/pages/viewpage.action?pageId=3673173
+gfcli:
+  build:
+    name:     "main"
+    path:     "./temp"
+    arch:     "amd64"
+    system:   "linux"
+    mod:      "none"
+    packSrc:  "resource,manifest"
+    version:  "v1.0.0"
+    extra:    ""

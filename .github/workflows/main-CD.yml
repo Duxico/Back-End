@@ -1,0 +1,72 @@
+name: CD
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  call-workflow-ci:
+    uses: ./.github/workflows/dev-CI.yml
+
+  cd:
+    needs: call-workflow-ci
+    strategy:
+      matrix:
+        go-version: [1.21.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - name: Verify dependencies
+        run: go mod verify
+
+      - name: Build executable
+        run: make build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+          platforms: linux/amd64
+
+      - name: Build docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: manifest/docker/Dockerfile
+          load: true
+          tags: backend
+          platforms: linux/amd64
+
+      - name: Save docker image
+        run: |
+          [[ -d ./tmp ]] || mkdir -p ./tmp
+          docker save backend -o ./tmp/backend.tar
+
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        with:
+            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            ARGS: "-rlgoDzvc -i --delete"
+            SOURCE: "./tmp/backend.tar ./manifest/deploy/docker-compose.yaml"
+            REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+            REMOTE_PORT: ${{ secrets.REMOTE_PORT }}
+            REMOTE_USER: ${{ secrets.REMOTE_USER }}
+            TARGET: ${{ secrets.REMOTE_TARGET }}
+            EXCLUDE: ""
+            SCRIPT_BEFORE: |
+              cd ${{ secrets.REMOTE_TARGET }}
+              [[ -f docker-compose.yaml ]] && docker-compose down
+              docker system prune -f
+              docker rmi backend || true
+            SCRIPT_AFTER: |
+              cd ${{ secrets.REMOTE_TARGET }}
+              docker load -i ./backend.tar
+              docker-compose up -d
